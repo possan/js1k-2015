@@ -1,0 +1,8 @@
+// precision mediump float;
+// uniform float T;
+varying float Z;
+
+void main(void) {
+  gl_FragColor=vec4(Z,Z,Z,1);
+//t.x * Z, Z * sin(t.y + T), Z * sin(T + Z), 1.0);
+}

@@ -1,0 +1,31 @@
+// precision mediump float;
+// uniform float T;
+
+attribute vec3 V;
+varying float Z;
+
+void main(void) {
+
+//  mat4 P2=mat4( 0.463,  0.0,    0.0,   0.0, 
+//                0.0,   0.617, 0.0,  0.0,
+//                0.0,   0.0,   -1.0, -1.0,
+//                sin(T/2.0), sin(T/3.0), 0.0, 1.0);
+//  mat4 P = mat4(1.0);
+//  P[0][0] = 0.46;
+//  P[1][1] = 0.61;
+//  P[2][3] = -1.0;
+//  P[3][3] = 1.0;
+
+  float N=0.0;
+  float O=1.0;
+
+ // mat4 P=;
+
+  vec4 v=vec4(V,O);
+
+  v.z+=2.0*(sin(T*2.0+v.x)+cos(T*2.0+v.y*1.5));
+
+  gl_Position=mat4(7, N, N, N, N, 7, N, N, N, N,-O, -O, 3.0*sin(T), 3.0*sin(T/2.0), N, O)*v;
+
+  Z=O-gl_Position.z/9.0;
+}
