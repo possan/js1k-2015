@@ -152,9 +152,12 @@ if (process.argv.length < 3) {
 
 var fs = require('fs');
 var incode = fs.readFileSync(process.argv[2], 'utf8').trim();
-code = crush(incode);
-code = crush(code);
-code = crush(code);
+code = incode;
+if (code.length < 6000)
+	code = crush(code);
+if (code.length < 2000)
+	code = crush(code);
+// code = crush(code);
 
 var targetsize = Math.floor(incode.length / 1024) * 1024;
 

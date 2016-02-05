@@ -18,6 +18,13 @@ code = code.replace(/[ ]+=[ ]+/g, "=");
 code = code.replace(/[ ]+\+[ ]+/g, "+");
 code = code.trim();
 
+var outcode = '';
+for(var j=0; j<code.length; j++) {
+	if (j % 60 == 0) outcode += '\"\n+\"';
+	outcode += code.substring(j, j + 1);
+}
+code = outcode;
+
 code = "var " + varname + '=\"' + code + '\";\n\n';
 
 fs.writeFileSync(process.argv[3], code, 'ascii');

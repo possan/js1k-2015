@@ -1,7 +1,7 @@
 // precision mediump float;
 // uniform float T;
 
-varying float Z;
+// varying float Z;
 varying vec3 UV;
 
 
@@ -37,6 +37,7 @@ float sdBox( vec3 p, vec3 b )
   return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
 }
 
+/*
 float sdEllipsoid( in vec3 p, in vec3 r )
 {
     return (length( p/r ) - 1.0) * min(min(r.x,r.y),r.z);
@@ -97,6 +98,7 @@ float sdConeSection( in vec3 p, in float h, in float r1, in float r2 )
     float d2 = max( sqrt( dot(p.xz,p.xz)*(1.0-si*si)) + q*si - r2, q );
     return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
 }
+*/
 
 float length2( vec2 p )
 {
@@ -115,6 +117,7 @@ float length8( vec2 p )
     return pow( p.x + p.y, 1.0/8.0 );
 }
 
+/*
 float sdTorus82( vec3 p, vec2 t )
 {
   vec2 q = vec2(length2(p.xz)-t.x,p.y);
@@ -131,7 +134,7 @@ float sdCylinder6( vec3 p, vec2 h )
 {
   return max( length6(p.xz)-h.x, abs(p.y)-h.y );
 }
-
+*/
 
 //----------------------------------------------------------------------
 
@@ -162,10 +165,15 @@ vec3 opTwist( vec3 p )
 
 vec2 map( in vec3 pos )
 {
-    vec2 res = opU( vec2( sdPlane(     pos), 1.0 ),
-                    vec2( sdSphere(    pos-vec3( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
+    vec2 res =
+    // opU(
+//         vec2( sdPlane(     pos), 1.0 ),
+        vec2( sdBox(    opRep( pos-vec3( 0.0,0.25, 0.0), vec3(1.0, 1.0, 1.0)), vec3(0.1,0.1,0.1) ), 0.0 )
+    // )
+;
+
+//    res = opU( res, vec2( sdBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
     /*
-    res = opU( res, vec2( sdBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
     res = opU( res, vec2( udRoundBox(  pos-vec3( 1.0,0.25, 1.0), vec3(0.15), 0.1 ), 41.0 ) );
     res = opU( res, vec2( sdTorus(     pos-vec3( 0.0,0.25, 1.0), vec2(0.20,0.05) ), 25.0 ) );
     res = opU( res, vec2( sdCapsule(   pos,vec3(-1.3,0.10,-0.1), vec3(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
@@ -244,6 +252,7 @@ vec3 calcNormal( in vec3 pos )
     return normalize(nor);
 }
 
+
 float calcAO( in vec3 pos, in vec3 nor )
 {
     float occ = 0.0;
@@ -256,7 +265,8 @@ float calcAO( in vec3 pos, in vec3 nor )
         occ += -(dd-hr)*sca;
         sca *= 0.95;
     }
-    return clamp( 1.0 - 3.0*occ, 0.0, 1.0 );    
+
+    return clamp( 1.0 - 3.0*occ, 0.0, 1.0 );
 }
 
 
@@ -268,24 +278,28 @@ vec3 render( in vec3 ro, in vec3 rd )
     vec2 res = castRay(ro,rd);
     float t = res.x;
     float m = res.y;
-    if( m>-0.5 )
+    if( m>-10.1 )
     {
-        vec3 pos = ro + t*rd;
+        vec3 pos = ro + t * rd;
         vec3 nor = calcNormal( pos );
         vec3 ref = reflect( rd, nor );
         
         // material        
-        col = 0.45 + 0.3*sin( vec3(0.05,0.08,0.10)*(m-1.0) );
-        
-        if( m<1.5 )
+
+        col = 0.45 + 0.3*sin( vec3(0.05, 0.05, 0.05) * (m-1.0) );
+
+        /*
+        if( m < 1.0 )
         {
             
             float f = mod( floor(5.0*pos.z) + floor(5.0*pos.x), 2.0);
             col = 0.4 + 0.1*f*vec3(1.0);
         }
+        */
 
         // lighitng        
         float occ = calcAO( pos, nor );
+ 
         vec3  lig = normalize( vec3(-0.6, 0.7, -0.5) );
         float amb = clamp( 0.5+0.5*nor.y, 0.0, 1.0 );
         float dif = clamp( dot( nor, lig ), 0.0, 1.0 );
@@ -294,19 +308,26 @@ vec3 render( in vec3 ro, in vec3 rd )
         float fre = pow( clamp(1.0+dot(nor,rd),0.0,1.0), 2.0 );
         float spe = pow(clamp( dot( ref, lig ), 0.0, 1.0 ),16.0);
         
-        dif *= softshadow( pos, lig, 0.02, 2.5 );
-        dom *= softshadow( pos, ref, 0.02, 2.5 );
+  //      dif *= softshadow( pos, lig, 0.02, 2.5 );
+//        dom *= softshadow( pos, ref, 0.02, 2.5 );
+        vec3 lin = vec3(nor * ro);
 
-        vec3 lin = vec3(0.0);
+//        lin += (0.5 + (0.5 * occ));
+
         lin += 1.20*dif*vec3(1.00,0.85,0.55);
-        lin += 1.20*spe*vec3(1.00,0.85,0.55)*dif;
-        lin += 0.20*amb*vec3(0.50,0.70,1.00)*occ;
-        lin += 0.30*dom*vec3(0.50,0.70,1.00)*occ;
-        lin += 0.30*bac*vec3(0.25,0.25,0.25)*occ;
-        lin += 0.40*fre*vec3(1.00,1.00,1.00)*occ;
-        col = col*lin;
+//        lin += 1.20*spe*vec3(1.00,0.85,0.55)*dif;
 
-        col = mix( col, vec3(0.8,0.9,1.0), 1.0-exp( -0.002*t*t ) );
+//        lin += 1.20*amb*vec3(0.50,0.70,1.00)*occ;
+//       lin += 1.30*dom*vec3(0.50,0.70,1.00)*occ;
+//        lin += 0.30*bac*vec3(0.25,0.25,0.25)*occ;
+//        lin += 2.40*fre*vec3(1.00,1.00,1.00)*occ;
+
+
+        col = col * lin;
+
+ //       col = nor * 200.6 * m;
+
+        col = mix( col, vec3(1.0,1.0,1.0), 1.0-exp( -0.02*t*t ) );
 
     }
 
@@ -366,15 +387,16 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
 
 
+
 void main(void) {
-    vec2 q = gl_FragCoord.xy / vec2(1000.0, 1000.0);
+    vec2 q = gl_FragCoord.xy / 1000.0;
     vec2 p = -1.0+2.0*q;
 
-    vec3 ro = vec3( -0.5+3.5*cos(1.0*T), 1.0, 0.5 + 3.5*sin(0.9*T) );
-    vec3 ta = vec3( -0.5, -0.4, 0.5 );
+    vec3 ro = vec3( -0.5+3.5*cos(1.0*T), 1.0 + 0.0 * cos(T * 0.3), 0.5 + 3.5*sin(0.9*T) );
+    vec3 ta = vec3( -0.5+5.0 * sin(T*0.4), 1.0 + 2.5 * cos(T * 0.5), 0.5+4.0*cos(0.6*T) );
 
     // camera-to-world transformation
-    mat3 ca = setCamera( ro, ta, 0.0 );
+    mat3 ca = setCamera( ro, ta, T*2.0 );
 
     // ray direction
     vec3 rd = ca * normalize( vec3(p.xy, 2.0) );
@@ -385,13 +407,13 @@ void main(void) {
     // col = pow( col, vec3(0.4545) );
    /*
    fragColor=vec4( col, 1.0 );
-   */
  float u = float(int(UV.x * 5.0)) / 5.0;
  float v = float(int(UV.y * 5.0)) / 5.0;
  float w = float(int(UV.z * 5.0)) / 5.0;
 vec4 col2 = vec4(u, v, w, 1.0);
+   */
 
-  gl_FragColor = col2 * vec4(K.x, K.y, K.z, 1.0);
+  gl_FragColor = vec4(K.x, K.y, K.z, 1.0);
 
   // vec4(UV.x,0.5 + sin(Z * 6.0)*3.0,cos(Z * 4.0) * 4.0 + 0.7*Z,1);
 
