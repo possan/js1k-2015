@@ -9,10 +9,10 @@ module.exports = function(grunt) {
   grunt.initConfig({
     exec: {
       shader1: {
-        cmd: 'node tools/stringify.js src/vertexshader.txt build/vertexshader.js vertex_shader_code',
+        cmd: 'node tools/stringify.js src/vertexshader.fs build/vertexshader.js vertex_shader_code',
       },
       shader2: {
-        cmd: 'node tools/stringify.js src/fragmentshader.txt build/fragmentshader.js fragment_shader_code',
+        cmd: 'node tools/stringify.js src/fragmentshader.fs build/fragmentshader.js fragment_shader_code',
       },
       crush: {
         cmd: 'node tools/jscrushish.js build/packed.js build/crushed.js'
@@ -21,7 +21,7 @@ module.exports = function(grunt) {
       	cmd: 'ls -la build/*.js'
       },
       report2: {
-        cmd: 'ls -la src/*txt'
+        cmd: 'ls -la src/*'
       }
     },
     concat: {
@@ -123,6 +123,14 @@ module.exports = function(grunt) {
         ],
         options: {
           spawn: false,
+          // livereload: true,
+        },
+      },
+      output: {
+        files: [ 'build/*.html' ],
+        options: {
+          spawn: false,
+          livereload: true,
         },
       },
     }
@@ -142,7 +150,5 @@ module.exports = function(grunt) {
     'exec:report',
     'exec:report2'
   ]);
-
-  // grunt.registerTask('watch', ['']);
 
 }

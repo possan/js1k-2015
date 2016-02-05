@@ -1,12 +1,3 @@
-// DEMO: Spacetrain
-
-// document.write('see console');
-// if (typeof(a) !== 'undefined') console.log('demo canvas', a);
-// if (typeof(b) !== 'undefined') console.log('demo body', b);
-// if (typeof(c) !== 'undefined') console.log('demo 2d context', c);
-// if (typeof(g) !== 'undefined') console.log('demo gl', g);
-// console.log('RAF', requestAnimationFrame);
-
 //
 //
 // GLOBALS
@@ -23,6 +14,22 @@ var T = 0;
 //
 //
 
+/*
+
+
+.:..#..:.
+:.:..:...
+.:..:.#..
+.:#....:.
+:....:...
+..:.#:.#.
+.:.....:.
+.#...:...
+
+
+
+*/
+
 var nstars = 10000;
 var vertices = [];
 
@@ -30,17 +37,24 @@ var RA = Math.random;
 for(var k=0; k<nstars; k++) {
   var x = RA() * 2 - 1; // 1.0 * Math.sin(k / 15.0);
   var y = RA() * 2 - 1; // 1.0 * Math.cos(k / 17.0);
-  vertices = vertices.concat([x,y,0,x,y,0]);
+  var z = RA() * 2 - 1; // 1.0 * Math.cos(k / 17.0);
+  var xx = RA() * 0.2 - 0.1; // 1.0 * Math.cos(k / 17.0);
+  var yy = RA() * 0.2 - 0.1; // 1.0 * Math.cos(k / 17.0);
+  var zz = RA() * 0.2 - 0.1; // 1.0 * Math.cos(k / 17.0);
+  vertices = vertices.concat([x-xx, y-yy, z+zz,
+                              x-yy, y+zz, z-zz,
+                              x+xx, y+xx, z+yy]);
 }
 
 var rf = function() {
 
-  g.clearColor(0, 0, 0, 1);
+  g.clearColor(0.2, 0.4, 0.3, 1);
   // g.enable(g.DEPTH_TEST);
   // g.depthFunc(g.LEQUAL);
   g.clear( 16384/*g.COLOR_BUFFER_BIT*/ );
   //  g.useProgram(prog);
 
+  /*
   for(var k=0; k<nstars; k++) {
     var z =  ((k + T * 2) % 30) - 15;
     // var o = k * 6;
@@ -48,12 +62,13 @@ var rf = function() {
     vertices[k*6 + 2] = z - RR;
     vertices[k*6 + 5] = z + RR;
   }
+  */
 
   g.bufferData(34962/*g.ARRAY_BUFFER*/, new Float32Array(vertices), 35044/*g.STATIC_DRAW*/);
   // console.log(g.FLOAT);
   // console.log(g.LINES);
   g.uniform1f(timeUniform, T);
-  g.drawArrays(1/*g.LINES*/, 0, nstars);
+  g.drawArrays(g.TRIANGLES, 0, nstars);
 
   requestAnimationFrame(rf);
   T += 0.01;

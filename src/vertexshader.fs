@@ -23,9 +23,10 @@ void main(void) {
 
   vec4 v=vec4(V,O);
 
-  v.z+=2.0*(sin(T*2.0+v.x)+cos(T*2.0+v.y*1.5));
+  v.z -= 14.0;
+  v.z += 5.0*(sin(T*2.0+v.x)+cos(T*2.0+v.y*1.5));
 
-  gl_Position=mat4(7, N, N, N, N, 7, N, N, N, N,-O, -O, 3.0*sin(T), 3.0*sin(T/2.0), N, O)*v;
+  gl_Position=mat4(7, N, N, N, N, 7, N, N, N, N,-O, -O, 3.0*sin(T/3.0), 3.0*sin(T/5.0), N, O)*v;
 
-  Z=O-gl_Position.z/9.0;
+  Z=O-gl_Position.z/15.0;
 }
